@@ -90,9 +90,7 @@ internal class ExtTestCaseGroupProvider : TestCaseGroupProvider, TestDisposable(
 
     companion object {
         /** Tests that should be compiled and executed as standalone tests. */
-        private val standalones: Set<File> = listOf(
-            // Comparison of type information obtained with reflection against non-patched string literal:
-            "compiler/testData/codegen/box/annotations/instances/annotationToString.kt"
+        private val standalones: Set<File> = listOf<String>(
         ).mapToSet(::getAbsoluteFile)
     }
 }
@@ -188,18 +186,6 @@ private class ExtTestDataFile(
                         isStandaloneTest = true
                     }
                     else -> super.visitKtFile(file)
-                }
-
-                override fun visitCallExpression(expression: KtCallExpression) = when {
-                    isStandaloneTest -> Unit
-                    expression.getChildOfType<KtNameReferenceExpression>()?.getReferencedNameAsName() == TYPE_OF_NAME -> {
-                        // Found a call of `typeOf()` function. It means that this is most likely a reflection-oriented test
-                        // that might compare the obtained name of a type against some string literal (ex: "foo.Bar<A>"),
-                        // which is obviously not patched during package names patching step because this step is not so smart.
-                        // So, let's avoid patching package names for this test and let's run it in standalone mode.
-                        isStandaloneTest = true
-                    }
-                    else -> super.visitCallExpression(expression)
                 }
             })
         }
