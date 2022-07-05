@@ -690,6 +690,26 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
     }
 
     @Test
+    fun copyWithNestedCopyToRecursively() {
+        val src = createTestFiles().cleanupRecursively()
+        val dst = createTempDirectory().cleanupRecursively().resolve("dst")
+        val nested = createTestFiles().cleanupRecursively()
+
+        src.copyToRecursively(dst, followLinks = false) { source, target ->
+            if (source.name == "2") {
+                println("directory 2")
+                nested.copyToRecursively(target, followLinks = false)
+            } else {
+                source.copyTo(target)
+            }
+            CopyActionResult.CONTINUE
+        }
+
+        val expected = listOf("") + referenceFilenames + referenceFilenames.map { "1/2/$it" }
+        testVisitedFiles(expected, dst.walkIncludeDirectories(), dst)
+    }
+
+    @Test
     fun copyWithTermination() {
         val src = createTestFiles().cleanupRecursively()
         val dst = createTempDirectory().cleanupRecursively().resolve("dst")
