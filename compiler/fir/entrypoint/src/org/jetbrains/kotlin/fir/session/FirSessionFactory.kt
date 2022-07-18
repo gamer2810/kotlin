@@ -266,7 +266,7 @@ object FirSessionFactory : FirAbstractSessionFactory() {
     ) = createLibrarySession(
         sessionProvider, moduleDataProvider, languageVersionSettings
     ) {
-        val kotlinScopeProvider = FirKotlinScopeProvider(::wrapScopeWithJvmMapped)
+        val kotlinScopeProvider = FirKotlinScopeProvider()
         register(FirKotlinScopeProvider::class, kotlinScopeProvider)
 
         val builtinsModuleData = createModuleDataForBuiltins(
