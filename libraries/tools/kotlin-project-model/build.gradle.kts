@@ -3,21 +3,20 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 plugins {
     kotlin("jvm")
     id("jps-compatible")
+    id("java-test-fixtures")
 }
 
 publish()
-
-testsJar { }
 
 standardPublicJars()
 
 dependencies {
     implementation(kotlinStdlib())
     implementation(project(":kotlin-tooling-core"))
-    testImplementation(kotlin("test-junit"))
-    testImplementation(project(":core:util.runtime"))
-    testImplementation(projectTests(":generators:test-generator"))
-    testImplementation(project(":kotlin-reflect"))
+    testFixturesImplementation(kotlin("test-junit"))
+    testFixturesImplementation(project(":core:util.runtime"))
+    testFixturesImplementation(projectTests(":generators:test-generator"))
+    testFixturesImplementation(project(":kotlin-reflect"))
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {
@@ -28,7 +27,7 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     }
 }
 
-tasks.named<KotlinJvmCompile>("compileTestKotlin") {
+tasks.named<KotlinJvmCompile>("compileTestFixturesKotlin") {
     kotlinOptions {
         freeCompilerArgs += listOf(
             "-XXLanguage:+AllowSealedInheritorsInDifferentFilesOfSamePackage",
