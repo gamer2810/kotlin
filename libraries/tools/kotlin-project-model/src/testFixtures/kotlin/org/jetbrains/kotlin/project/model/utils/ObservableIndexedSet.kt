@@ -15,8 +15,8 @@ class ObservableIndexedSet<T : KpmTestEntity> private constructor(
     private val allItemsActions = mutableListOf<T.() -> Unit>()
 
     fun add(item: T) {
-        allItemsActions.forEach { action -> action(item) }
         items[item.name] = item
+        allItemsActions.forEach { action -> action(item) }
     }
 
     fun withAll(action: T.() -> Unit) {
@@ -24,7 +24,8 @@ class ObservableIndexedSet<T : KpmTestEntity> private constructor(
         allItemsActions.add(action)
     }
 
-    fun getOrPut(name: String, defaultValue: () -> T): T = items.getOrPut(name, defaultValue)
+    fun getOrPut(name: String, defaultValue: () -> T): T =
+        if (!items.contains(name)) defaultValue().also { add(it) } else items[name]!!
 
     operator fun get(name: String): T? = items[name]
     operator fun set(name: String, value: T) {
