@@ -8,30 +8,30 @@ package org.jetbrains.kotlin.project.model.utils
 import org.jetbrains.kotlin.project.model.infra.KpmTestEntity
 
 class ObservableIndexedCollection<T : KpmTestEntity> private constructor(
-    val items: MutableMap<String, T>
-) : Collection<T> by items.values {
+    private val _items: MutableMap<String, T>
+) : Collection<T> by _items.values {
     constructor() : this(mutableMapOf())
 
     private val allItemsActions = mutableListOf<T.() -> Unit>()
 
     fun add(item: T) {
-        items[item.name] = item
+        _items[item.name] = item
         allItemsActions.forEach { action -> action(item) }
     }
 
     fun withAll(action: T.() -> Unit) {
-        items.values.forEach(action)
+        _items.values.forEach(action)
         allItemsActions.add(action)
     }
 
     fun getOrPut(name: String, defaultValue: () -> T): T =
-        if (!items.contains(name)) defaultValue().also { add(it) } else items[name]!!
+        if (!_items.contains(name)) defaultValue().also { add(it) } else _items[name]!!
 
-    operator fun get(name: String): T? = items[name]
+    operator fun get(name: String): T? = _items[name]
     operator fun set(name: String, value: T) {
-        items[name] = value
+        _items[name] = value
     }
 
     fun <V : KpmTestEntity> mapValuesTo(other: ObservableIndexedCollection<V>, action: (T) -> V) =
-        other.items.putAll(items.mapValues { action(it.value) })
+        other._items.putAll(_items.mapValues { action(it.value) })
 }
