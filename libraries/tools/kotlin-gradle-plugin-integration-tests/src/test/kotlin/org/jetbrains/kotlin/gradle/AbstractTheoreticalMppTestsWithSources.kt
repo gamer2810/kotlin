@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.project.model.infra.KpmCoreCasesTestRunner
 import org.jetbrains.kotlin.project.model.infra.KpmTestCase
 
 abstract class AbstractTheoreticalMppTestsWithSources : KGPBaseTest(), KpmCoreCasesTestRunner {
-    override fun runTest(kpmTestCase: KpmTestCase) {
+    fun runTest(kpmTestCase: KpmTestCase) {
         println("run test ${kpmTestCase.name}")
     }
 }

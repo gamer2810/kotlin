@@ -47,7 +47,7 @@ dependencies {
     }
     testImplementation(project(":kotlin-gradle-plugin-model"))
     testImplementation(project(":kotlin-gradle-build-metrics"))
-    testImplementation(projectTests(":kotlin-project-model"))
+    testImplementation(testFixtures(project(":kotlin-project-model")))
     testImplementation(project(":kotlin-tooling-metadata"))
     testImplementation(kotlinGradlePluginTest)
     testImplementation(project(":kotlin-gradle-subplugin-example"))
