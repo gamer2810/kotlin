@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     id("jps-compatible")
+    id("java-test-fixtures")
 }
 
 dependencies {
@@ -9,7 +10,7 @@ dependencies {
     testApi(projectTests(":compiler:incremental-compilation-impl"))
     testApi(projectTests(":plugins:jvm-abi-gen"))
     testApi(projectTests(":generators:test-generator"))
-    testApi(projectTests(":kotlin-project-model"))
+    testApi(testFixtures(project(":kotlin-project-model")))
     testApi(project(":kotlin-project-model"))
     testCompileOnly(project(":kotlin-reflect-api"))
     testImplementation(project(":kotlin-reflect"))
