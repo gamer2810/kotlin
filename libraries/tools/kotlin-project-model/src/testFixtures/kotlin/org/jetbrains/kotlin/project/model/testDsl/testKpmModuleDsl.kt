@@ -21,7 +21,7 @@ fun TestKpmModule.fragment(name: String, applyDefaults: Boolean = true, configur
 }
 
 fun TestKpmModule.fragmentNamed(name: String): TestKpmFragment =
-    fragments[name] ?: error("Fragment with name $name doesn't exist. Existing fragments $fragments")
+    fragments[name] ?: error("Fragment with name $name doesn't exist. Existing fragments ${fragments.joinToString { it.name }}")
 
 fun TestKpmModule.variant(
     name: String,

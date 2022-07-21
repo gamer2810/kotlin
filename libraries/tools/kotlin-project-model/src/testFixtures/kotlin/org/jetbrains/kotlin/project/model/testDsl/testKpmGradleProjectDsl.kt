@@ -30,7 +30,7 @@ fun TestKpmGradleProject.module(name: String, applyDefaults: Boolean = true, con
 }
 
 fun TestKpmGradleProject.moduleNamed(name: String): TestKpmModule =
-    modules[name] ?: error("Module with name $name doesn't exist. Existing modules: ${modules.items}")
+    modules[name] ?: error("Module with name $name doesn't exist. Existing modules: ${modules.joinToString { it.name }}")
 
 val TestKpmGradleProject.main get() = moduleNamed("main")
 val TestKpmGradleProject.test get() = moduleNamed("test")

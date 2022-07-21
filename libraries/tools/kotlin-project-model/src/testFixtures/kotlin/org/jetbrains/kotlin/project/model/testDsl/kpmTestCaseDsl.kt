@@ -32,6 +32,7 @@ fun KpmTestCase.project(
 }
 
 fun KpmTestCase.projectNamed(name: String) = projects[name]
+    ?: error("Project with name $name doesn't exist. Existing projects: ${projects.joinToString { it.name }}")
 
 fun KpmTestCase.allModules(configure: TestKpmModule.() -> Unit) {
     projects.withAll {
