@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.project.model.infra.generate.generateKpmTestCases
 import org.jetbrains.kotlin.project.model.infra.generate.kpmRunnerWithSources
 
 fun main() {
-    System.setProperty("java.awt.headless", "true")
     generateKpmTestCases {
         kpmRunnerWithSources<AbstractTheoreticalMppTestsWithSources>(
             "libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/java",
