@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.project.model.infra
 
 import org.jetbrains.kotlin.project.model.*
 import org.jetbrains.kotlin.project.model.testDsl.*
-import org.jetbrains.kotlin.project.model.utils.ObservableIndexedSet
+import org.jetbrains.kotlin.project.model.utils.ObservableIndexedCollection
 import org.jetbrains.kotlin.tooling.core.MutableExtras
 import org.jetbrains.kotlin.tooling.core.mutableExtrasOf
 import java.io.File
@@ -19,7 +19,7 @@ interface KpmTestEntity {
 class KpmTestCase(
     override val name: String,
 ) : KpmTestEntity {
-    val projects: ObservableIndexedSet<TestKpmGradleProject> = ObservableIndexedSet()
+    val projects: ObservableIndexedCollection<TestKpmGradleProject> = ObservableIndexedCollection()
     val extras: MutableExtras = mutableExtrasOf()
 
     override fun toString(): String = "Case $name"
@@ -38,7 +38,7 @@ class TestKpmGradleProject(
     val containingCase: KpmTestCase,
     override val name: String,
 ) : KpmTestEntity {
-    val modules: ObservableIndexedSet<TestKpmModule> = ObservableIndexedSet()
+    val modules: ObservableIndexedCollection<TestKpmModule> = ObservableIndexedCollection()
     val extras: MutableExtras = mutableExtrasOf()
 
     fun applyDefaults() {
@@ -57,7 +57,7 @@ class TestKpmModule(
     val containingProject: TestKpmGradleProject,
     override val moduleIdentifier: KpmModuleIdentifier,
 ) : KpmTestEntity, KpmModule {
-    override val fragments: ObservableIndexedSet<TestKpmFragment> = ObservableIndexedSet()
+    override val fragments: ObservableIndexedCollection<TestKpmFragment> = ObservableIndexedCollection()
     override val plugins: MutableSet<KpmCompilerPlugin> = mutableSetOf()
     val extras: MutableExtras = mutableExtrasOf()
 
