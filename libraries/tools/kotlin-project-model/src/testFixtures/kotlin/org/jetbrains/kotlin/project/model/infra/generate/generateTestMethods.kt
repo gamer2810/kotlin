@@ -47,7 +47,7 @@ internal fun generateTestMethodsTemplateForCases(cases: Set<String>, generateTes
         for (case in cases) {
             append(
                 """
-                    fun test$case() {
+                    fun test$case(case: KpmTestCase) {
                         ${generateTestMethodBody(case)}
                     }
                     
