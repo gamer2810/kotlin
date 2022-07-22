@@ -6,8 +6,7 @@
 package org.jetbrains.kotlin.ir.backend.js
 
 import org.jetbrains.kotlin.backend.common.serialization.metadata.buildKlibPackageFragment
-import org.jetbrains.kotlin.config.CommonConfigurationKeys
-import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.utils.classId
@@ -19,6 +18,7 @@ import org.jetbrains.kotlin.fir.serialization.FirSerializerExtension
 import org.jetbrains.kotlin.fir.serialization.TypeApproximatorForMetadataSerializer
 import org.jetbrains.kotlin.metadata.ProtoBuf
 import org.jetbrains.kotlin.metadata.deserialization.BinaryVersion
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.serialization.SerializableStringTable
 
 fun serializeSingleFirFile(file: FirFile, session: FirSession, scopeSession: ScopeSession, metadataVersion: BinaryVersion): ProtoBuf.PackageFragment {
@@ -58,6 +58,12 @@ class FirKLibSerializerExtension(
     override val session: FirSession,
     override val metadataVersion: BinaryVersion,
     override val stringTable: FirElementAwareSerializableStringTable
-) : FirSerializerExtension()
+) : FirSerializerExtension() {
+    override fun shouldSerializeFunction(function: FirFunction): Boolean = true
 
-class FirElementAwareSerializableStringTable() : FirElementAwareStringTable, SerializableStringTable()
+    override fun shouldSerializeProperty(property: FirProperty): Boolean = true
+}
+
+class FirElementAwareSerializableStringTable() : FirElementAwareStringTable, SerializableStringTable() {
+    override fun getLocalClassIdReplacement(firClass: FirClass): ClassId? = ClassId.topLevel(StandardNames.FqNames.any.toSafe())
+}
