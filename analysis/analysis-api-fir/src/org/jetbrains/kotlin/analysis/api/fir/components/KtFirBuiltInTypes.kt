@@ -22,6 +22,7 @@ internal class KtFirBuiltInTypes(
     override val token: KtLifetimeToken
 ) : KtBuiltinTypes() {
 
+    override val NUMBER: KtType by cachedBuiltin(builtinTypes.numberType)
     override val INT: KtType by cachedBuiltin(builtinTypes.intType)
     override val LONG: KtType by cachedBuiltin(builtinTypes.longType)
     override val SHORT: KtType by cachedBuiltin(builtinTypes.shortType)
@@ -41,6 +42,9 @@ internal class KtFirBuiltInTypes(
     override val THROWABLE: KtType by cachedBuiltin(builtinTypes.throwableType)
     override val NULLABLE_ANY: KtType by cachedBuiltin(builtinTypes.nullableAnyType)
     override val NULLABLE_NOTHING: KtType by cachedBuiltin(builtinTypes.nullableNothingType)
+    override val ANNOTATION: KtType by cachedBuiltin(builtinTypes.annotationType)
+    override val ITERABLE: KtType by cachedBuiltin(builtinTypes.iterableType)
+    override val ARRAY: KtType by cachedBuiltin(builtinTypes.arrayType)
 
     private fun cachedBuiltin(builtinTypeRef: FirImplicitBuiltinTypeRef): ValidityAwareCachedValue<KtFirUsualClassType> = cached {
         KtFirUsualClassType(builtinTypeRef.type as ConeClassLikeTypeImpl, token, builder)

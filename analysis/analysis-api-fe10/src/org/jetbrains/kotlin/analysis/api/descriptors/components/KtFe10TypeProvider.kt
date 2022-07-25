@@ -49,6 +49,7 @@ import org.jetbrains.kotlin.types.error.ErrorType
 import org.jetbrains.kotlin.types.error.ErrorTypeKind
 import org.jetbrains.kotlin.types.error.ErrorUtils
 import org.jetbrains.kotlin.types.typeUtil.isNothing
+import org.jetbrains.kotlin.types.typeUtil.replaceArgumentsWithStarProjections
 import org.jetbrains.kotlin.util.containingNonLocalDeclaration
 
 internal class KtFe10TypeProvider(
@@ -427,6 +428,9 @@ private class KtFe10BuiltinTypes(private val analysisContext: Fe10AnalysisContex
     override val token: KtLifetimeToken
         get() = analysisContext.token
 
+    override val NUMBER: KtType
+        get() = withValidityAssertion { analysisContext.builtIns.numberType.toKtType(analysisContext) }
+
     override val INT: KtType
         get() = withValidityAssertion { analysisContext.builtIns.intType.toKtType(analysisContext) }
 
@@ -471,5 +475,16 @@ private class KtFe10BuiltinTypes(private val analysisContext: Fe10AnalysisContex
 
     override val NULLABLE_NOTHING: KtType
         get() = withValidityAssertion { analysisContext.builtIns.nullableNothingType.toKtType(analysisContext) }
+
+    override val ANNOTATION: KtType
+        get() = withValidityAssertion { analysisContext.builtIns.annotationType.toKtType(analysisContext) }
+
+    override val ITERABLE: KtType
+        get() = withValidityAssertion { analysisContext.builtIns.iterableType.toKtType(analysisContext) }
+
+    override val ARRAY: KtType
+        get() = withValidityAssertion {
+            analysisContext.builtIns.array.defaultType.replaceArgumentsWithStarProjections().toKtType(analysisContext)
+        }
 
 }

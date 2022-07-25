@@ -59,6 +59,7 @@ class BuiltinTypes {
     val enumType: FirImplicitBuiltinTypeRef = FirImplicitEnumTypeRef(null)
     val annotationType: FirImplicitBuiltinTypeRef = FirImplicitAnnotationTypeRef(null)
     val booleanType: FirImplicitBuiltinTypeRef = FirImplicitBooleanTypeRef(null)
+    val numberType: FirImplicitBuiltinTypeRef = FirImplicitNumberTypeRef(null)
     val byteType: FirImplicitBuiltinTypeRef = FirImplicitByteTypeRef(null)
     val shortType: FirImplicitBuiltinTypeRef = FirImplicitShortTypeRef(null)
     val intType: FirImplicitBuiltinTypeRef = FirImplicitIntTypeRef(null)
@@ -74,4 +75,6 @@ class BuiltinTypes {
     val charType: FirImplicitBuiltinTypeRef = FirImplicitCharTypeRef(null)
     val stringType: FirImplicitBuiltinTypeRef = FirImplicitStringTypeRef(null)
     val throwableType: FirImplicitThrowableTypeRef = FirImplicitThrowableTypeRef(null)
+    val iterableType: FirImplicitBuiltinTypeRef = FirImplicitIterableTypeRef(null)
+    val arrayType: FirImplicitBuiltinTypeRef = FirImplicitArrayTypeRef(null)
 }

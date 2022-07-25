@@ -142,6 +142,7 @@ public interface KtTypeProviderMixIn : KtAnalysisSessionMixIn {
 
 @Suppress("PropertyName")
 public abstract class KtBuiltinTypes : KtLifetimeOwner {
+    public abstract val NUMBER: KtType
     public abstract val INT: KtType
     public abstract val LONG: KtType
     public abstract val SHORT: KtType
@@ -162,4 +163,8 @@ public abstract class KtBuiltinTypes : KtLifetimeOwner {
 
     public abstract val NULLABLE_ANY: KtType
     public abstract val NULLABLE_NOTHING: KtType
+
+    public abstract val ANNOTATION: KtType
+    public abstract val ITERABLE: KtType
+    public abstract val ARRAY: KtType
 }
