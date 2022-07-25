@@ -52,7 +52,7 @@ private class EnumClassLowering(private val context: JvmBackendContext) : ClassL
      * ```
      * enum MyEnum extends Enum<MyEnum> {
      *     private static final synthetic MyEnum[] $VALUES
-     *     private static final synthetic List<MyEnum> $ENTRIES;
+     *     private static final synthetic EnumEntries<MyEnum> $ENTRIES;
      *
      *     <clinit> {
      *         A = new MyEnum("A", 0);
@@ -66,7 +66,7 @@ private class EnumClassLowering(private val context: JvmBackendContext) : ClassL
      *     }
      *
      *     // Should be RO property from Kotlin standpoint
-     *     public static List<MyEnum> getEntries() {
+     *     public static EnumEntries<MyEnum> getEntries() {
      *         return $ENTRIES;
      *     }
      *
