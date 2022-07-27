@@ -53,7 +53,7 @@ abstract class DukatTask(
         get() = resolutionManager.requireInstalled(
             services,
             logger
-        )[projectPath][compilationName]
+        )!![projectPath][compilationName]
 
     @get:Internal
     val dts: List<DtsResolver.Dts>
@@ -97,7 +97,7 @@ abstract class DukatTask(
 
     @TaskAction
     open fun run() {
-        resolutionManager.checkRequiredDependencies(this, services, logger, projectPath)
+        resolutionManager.checkRequiredDependencies(this)
 
         destinationDir.deleteRecursively()
 

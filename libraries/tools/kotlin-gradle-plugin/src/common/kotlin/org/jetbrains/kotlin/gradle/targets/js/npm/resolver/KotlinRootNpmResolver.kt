@@ -279,6 +279,9 @@ internal class KotlinRootNpmResolver internal constructor(
             logger: Logger
         ): KotlinRootNpmResolution {
             synchronized(projectResolvers) {
+                if (state == RootResolverState.INSTALLED) {
+                    return KotlinRootNpmResolution(rootProject, projectResolutions)
+                }
                 check(state == RootResolverState.PROJECTS_CLOSED) {
                     "Projects must be closed"
                 }
