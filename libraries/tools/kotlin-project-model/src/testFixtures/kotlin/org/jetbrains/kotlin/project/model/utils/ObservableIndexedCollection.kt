@@ -28,9 +28,6 @@ class ObservableIndexedCollection<T : KpmTestEntity> private constructor(
         if (!_items.contains(name)) defaultValue().also { add(it) } else _items[name]!!
 
     operator fun get(name: String): T? = _items[name]
-    operator fun set(name: String, value: T) {
-        _items[name] = value
-    }
 
     fun <V : KpmTestEntity> mapValuesTo(other: ObservableIndexedCollection<V>, action: (T) -> V) =
         other._items.putAll(_items.mapValues { action(it.value) })
