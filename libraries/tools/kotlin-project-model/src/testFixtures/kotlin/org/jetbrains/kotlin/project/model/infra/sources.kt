@@ -25,12 +25,12 @@ import java.io.File
 
 fun KpmTestCase.addSourcesFromCanonicalFileStructure(root: File): KpmTestCase {
     return addSources { fragment ->
-        val canonicalFragmentTesdataFolder = fragment.canonicalSourceFolderAbsolute(root)
-        require(canonicalFragmentTesdataFolder.exists()) {
-            "Can't find testdata for fragment $fragment at ${canonicalFragmentTesdataFolder.absolutePath}"
+        val canonicalFragmentTestdataFolder = fragment.canonicalSourceFolderAbsolute(root)
+        require(canonicalFragmentTestdataFolder.exists()) {
+            "Can't find testdata for fragment $fragment at ${canonicalFragmentTestdataFolder.absolutePath}"
         }
 
-        canonicalFragmentTesdataFolder.listFiles()?.toList().orEmpty()
+        canonicalFragmentTestdataFolder.listFiles()?.toList().orEmpty()
     }
 }
 
