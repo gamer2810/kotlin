@@ -107,7 +107,7 @@ class TestKpmVariant(
 ) : TestKpmFragment(containingModule, fragmentName), KpmTestEntity, KpmVariant {
     override val variantAttributes: MutableMap<KotlinAttributeKey, String> = mutableMapOf()
 
-    override fun fork(parent: TestKpmModule): TestKpmFragment = TestKpmVariant(parent, fragmentName).also { forkedVariant ->
+    override fun fork(parent: TestKpmModule): TestKpmVariant = TestKpmVariant(parent, fragmentName).also { forkedVariant ->
         forkedVariant.languageSettings = this.languageSettings
         forkedVariant.extras.putAll(this.extras)
         forkedVariant.kotlinSourceRoots.addAll(this.kotlinSourceRoots)
