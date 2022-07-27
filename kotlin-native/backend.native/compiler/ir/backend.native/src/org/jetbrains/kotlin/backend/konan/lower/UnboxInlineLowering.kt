@@ -40,7 +40,7 @@ private class AccessorInliner(commonBackendContext: CommonBackendContext) : IrEl
 
     private fun IrFunction.isEasyInlineableUnbox(): Boolean =
             origin == DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION &&
-                    returnType != anyType &&
+                    name.asString().endsWith("-unbox>") &&
                     !returnType.isNullable()
 
     override fun visitCall(expression: IrCall): IrExpression {
