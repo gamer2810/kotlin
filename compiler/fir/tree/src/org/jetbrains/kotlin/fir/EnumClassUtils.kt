@@ -119,10 +119,6 @@ fun FirRegularClassBuilder.generateValueOfFunction(
 fun FirRegularClassBuilder.generateEntriesGetter(
     moduleData: FirModuleData, packageFqName: FqName, classFqName: FqName, makeExpect: Boolean = false
 ) {
-    if (!moduleData.session.languageVersionSettings.supportsFeature(LanguageFeature.EnumEntries)) {
-        return
-    }
-
     val sourceElement = source?.fakeElement(KtFakeSourceElementKind.EnumGeneratedDeclaration)
     declarations += buildProperty {
         source = sourceElement
