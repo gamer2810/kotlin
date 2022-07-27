@@ -52,9 +52,6 @@ fun IrAnnotationContainer.getJsPolyfill(): String? =
 fun IrAnnotationContainer.hasJsPolyfill(): Boolean =
     hasAnnotation(JsAnnotations.JsPolyfillFqn)
 
-fun IrAnnotationContainer.getJsFunAnnotation(): String? =
-    getAnnotation(JsAnnotations.jsFunFqn)?.getSingleConstStringArgument()
-
 fun IrAnnotationContainer.isJsExport(): Boolean =
     hasAnnotation(JsAnnotations.jsExportFqn)
 
@@ -63,8 +60,6 @@ fun IrAnnotationContainer.isJsNativeGetter(): Boolean = hasAnnotation(JsAnnotati
 fun IrAnnotationContainer.isJsNativeSetter(): Boolean = hasAnnotation(JsAnnotations.jsNativeSetter)
 
 fun IrAnnotationContainer.isJsNativeInvoke(): Boolean = hasAnnotation(JsAnnotations.jsNativeInvoke)
-
-fun IrAnnotationContainer.isAnnotatedWithJsFun(): Boolean = hasAnnotation(JsAnnotations.jsFunFqn)
 
 fun IrDeclarationWithName.getJsNameForOverriddenDeclaration(): String? {
     val jsName = getJsName()

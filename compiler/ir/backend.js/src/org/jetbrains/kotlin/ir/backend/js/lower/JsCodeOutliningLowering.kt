@@ -155,7 +155,7 @@ private class JsCodeOutlineTransformer(
             is IrDeclarationParent -> container
             else -> container.parent
         }
-        kotlinLocalsUsedInJs.forEach { local ->
+        kotlinLocalsUsedInJs.values.forEach { local ->
             outlinedFunction.addValueParameter {
                 name = local.name
                 type = local.type
@@ -175,22 +175,16 @@ private class JsCodeOutlineTransformer(
                 newStatements += JsReturn(JsPrefixOperation(JsUnaryOperator.VOID, JsIntLiteral(3)))
             }
         }
-        val newFun = JsFunction(emptyScope, JsBlock(newStatements), "")
-        kotlinLocalsUsedInJs.forEach { irParameter ->
-            newFun.parameters.add(JsParameter(JsName(irParameter.name.identifier, false)))
+        val newFun = JsFunction(emptyScope, JsBlock(newStatements), "Outlined js() call")
+        kotlinLocalsUsedInJs.keys.forEach { jsName ->
+            newFun.parameters.add(JsParameter(jsName))
         }
 
-        with(backendContext.createIrBuilder(container.symbol)) {
-            // Add @JsFun("function (used_local1, used_local2, ..) { ... }") annotation to outlined function
-            val jsFunCtor = backendContext.intrinsics.jsFunAnnotationSymbol.constructors.single()
-            val jsFunCall =
-                irCall(jsFunCtor).apply {
-                    putValueArgument(0, irString(newFun.toString()))
-                }
-            outlinedFunction.annotations = listOf(jsFunCall)
+        backendContext.addOutlinedJsCode(outlinedFunction.symbol, newFun)
 
+        with(backendContext.createIrBuilder(container.symbol)) {
             val outlinedFunctionCall = irCall(outlinedFunction).apply {
-                kotlinLocalsUsedInJs.forEachIndexed { index, local ->
+                kotlinLocalsUsedInJs.values.forEachIndexed { index, local ->
                     putValueArgument(index, irGet(local))
                 }
             }
@@ -249,9 +243,9 @@ private class KotlinLocalsUsageCollector(
 ) : RecursiveJsVisitor() {
     private val functionStack = mutableListOf<JsFunction?>(null)
     private val processedNames = mutableSetOf<String>()
-    private val kotlinLocalsUsedInJs = mutableListOf<IrValueDeclaration>()
+    private val kotlinLocalsUsedInJs = mutableMapOf<JsName, IrValueDeclaration>()
 
-    val usedLocals: List<IrValueDeclaration>
+    val usedLocals: Map<JsName, IrValueDeclaration>
         get() = kotlinLocalsUsedInJs
 
     override fun visitFunction(x: JsFunction) {
@@ -267,7 +261,9 @@ private class KotlinLocalsUsageCollector(
         // We will also collect shadowed usages, but it is OK since the same shadowing will be present in generated JS code.
         // Keeping track of processed names to avoid registering them multiple times
         if (processedNames.add(name.ident) && !name.isDeclaredInsideJsCode()) {
-            kotlinLocalsUsedInJs.addIfNotNull(findValueDeclarationWithName(name.ident))
+            findValueDeclarationWithName(name.ident)?.let {
+                kotlinLocalsUsedInJs[name] = it
+            }
         }
     }
 

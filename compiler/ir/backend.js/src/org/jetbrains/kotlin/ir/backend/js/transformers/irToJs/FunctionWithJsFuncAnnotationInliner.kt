@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.ir.backend.js.transformers.irToJs
 import org.jetbrains.kotlin.backend.common.compilationException
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.backend.js.utils.JsGenerationContext
-import org.jetbrains.kotlin.ir.backend.js.utils.getJsFunAnnotation
 import org.jetbrains.kotlin.js.backend.ast.*
 
 class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, private val context: JsGenerationContext) {
@@ -24,13 +23,16 @@ class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, privat
             }
     }
 
-    private fun getJsFunctionImplementation(): JsFunction {
-        val code = jsFuncCall.symbol.owner.getJsFunAnnotation() ?: compilationException("JsFun annotation is expected", jsFuncCall)
-        val statements = parseJsCode(code) ?: compilationException("Cannot compute js code", jsFuncCall)
-        return statements.singleOrNull()
-            ?.let { it as? JsExpressionStatement }
-            ?.let { it.expression as? JsFunction } ?: compilationException("Provided js code is not a js function", jsFuncCall.symbol.owner)
-    }
+    private fun getJsFunctionImplementation(): JsFunction = context.staticContext.backendContext.getJsCodeForFunction(jsFuncCall.symbol)
+        ?: compilationException("JS function not found", jsFuncCall)
+
+//    private fun getJsFunctionImplementation(): JsFunction {
+//        val code = context.staticContext.backendContext.getJsCodeForFunction(jsFuncCall.symbol)!!.toString() //?: compilationException("JsFun annotation is expected", jsFuncCall)
+//        val statements = parseJsCode(code) ?: compilationException("Cannot compute js code", jsFuncCall)
+//        return statements.singleOrNull()
+//            ?.let { it as? JsExpressionStatement }
+//            ?.let { it.expression as? JsFunction } ?: compilationException("Provided js code is not a js function", jsFuncCall.symbol.owner)
+//    }
 
     private fun collectReplacementsForCall(): Map<JsName, JsExpression> {
         val translatedArguments = Array(jsFuncCall.valueArgumentsCount) {
