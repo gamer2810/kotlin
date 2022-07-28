@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.ir.backend.js.lower.inline.*
 import org.jetbrains.kotlin.ir.backend.js.lower.interfaces.CollectClassesForInstanceCheckLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.interfaces.CollectInterfacesForInstanceCheckLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.interfaces.CollectReflectedInterfacesLowering
+import org.jetbrains.kotlin.ir.backend.js.lower.interfaces.MoveInstanceCheckableInterfacesAtTheTop
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 
@@ -819,6 +820,12 @@ private val collectClassesForInstanceCheckLowering = makeDeclarationTransformerP
     prerequisite = setOf(collectInterfacesForInstanceCheckLowering)
 )
 
+private val moveSubtypeCheckedInterfacesAtTheTop = makeCustomJsModulePhase(
+    { _, module -> MoveInstanceCheckableInterfacesAtTheTop(module).transform() },
+    name = "MoveOpenClassesToSeparateFiles",
+    description = "Move open classes to separate files"
+).toModuleLowering()
+
 private val cleanupLoweringPhase = makeBodyLoweringPhase(
     { CleanupLowering() },
     name = "CleanupLowering",
@@ -944,6 +951,7 @@ val loweringList = listOf<Lowering>(
     escapedIdentifiersLowering,
     collectInterfacesForInstanceCheckLowering,
     collectClassesForInstanceCheckLowering,
+    moveSubtypeCheckedInterfacesAtTheTop,
     cleanupLoweringPhase,
     // Currently broken due to static members lowering making single-open-class
     // files non-recognizable as single-class files
