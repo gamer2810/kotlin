@@ -33926,6 +33926,12 @@ public class NativeCodegenBoxTestGenerated extends AbstractNativeCodegenBoxTest 
                 }
 
                 @Test
+                @TestMetadata("nativeWithoutPackagePatching.kt")
+                public void testNativeWithoutPackagePatching() throws Exception {
+                    runTest("compiler/testData/codegen/box/reflection/classLiterals/nativeWithoutPackagePatching.kt");
+                }
+
+                @Test
                 @TestMetadata("simpleClassLiteral.kt")
                 public void testSimpleClassLiteral() throws Exception {
                     runTest("compiler/testData/codegen/box/reflection/classLiterals/simpleClassLiteral.kt");
