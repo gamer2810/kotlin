@@ -89,9 +89,7 @@ internal class ExtTestCaseGroupProvider : TestCaseGroupProvider, TestDisposable(
         private val excludes: Set<File> = listOf<String>().mapToSet(::getAbsoluteFile)
 
         /** Tests that should be compiled and executed as standalone tests. */
-        private val standalones: Set<File> = listOf(
-            // Comparison of type information obtained with reflection against non-patched string literal:
-            "compiler/testData/codegen/box/annotations/instances/annotationToString.kt"
+        private val standalones: Set<File> = listOf<String>(
         ).mapToSet(::getAbsoluteFile)
     }
 }
