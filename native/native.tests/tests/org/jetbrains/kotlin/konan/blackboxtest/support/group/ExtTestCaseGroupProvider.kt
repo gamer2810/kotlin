@@ -73,7 +73,7 @@ internal class ExtTestCaseGroupProvider : TestCaseGroupProvider, TestDisposable(
 
                 if (extTestDataFile.isRelevant)
                     testCases += extTestDataFile.createTestCase(
-                        definitelyStandaloneTest = settings.get<ForcedStandaloneTestKind>().value || testDataFile in standalones,
+                        definitelyStandaloneTest = settings.get<ForcedStandaloneTestKind>().value,
                         sharedModules = sharedModules
                     )
                 else
@@ -87,10 +87,6 @@ internal class ExtTestCaseGroupProvider : TestCaseGroupProvider, TestDisposable(
     companion object {
         /** Test data files or test data directories that are excluded from testing. */
         private val excludes: Set<File> = listOf<String>().mapToSet(::getAbsoluteFile)
-
-        /** Tests that should be compiled and executed as standalone tests. */
-        private val standalones: Set<File> = listOf<String>(
-        ).mapToSet(::getAbsoluteFile)
     }
 }
 
@@ -173,6 +169,8 @@ private class ExtTestDataFile(
      * - test is compiled independently of any other tests
      */
     private fun determineIfStandaloneTest(): Boolean = with(structure) {
+        if (directives.contains(NATIVE_STANDALONE_DIRECTIVE)) return true
+
         var isStandaloneTest = false
 
         filesToTransform.forEach { handler ->
@@ -537,6 +535,8 @@ private class ExtTestDataFile(
 
         private const val EXPECT_ACTUAL_LINKER_DIRECTIVE = "EXPECT_ACTUAL_LINKER"
         private const val USE_EXPERIMENTAL_DIRECTIVE = "USE_EXPERIMENTAL"
+
+        private const val NATIVE_STANDALONE_DIRECTIVE = "NATIVE_STANDALONE"
 
         private const val OPT_IN_DIRECTIVE = "OPT_IN"
         private val OPT_INS_PURELY_FOR_COMPILER = setOf(
