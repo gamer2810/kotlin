@@ -32,14 +32,15 @@ fun serializeSingleFirFile(file: FirFile, session: FirSession, scopeSession: Sco
 
     val packageProto = packageSerializer.packagePartProto(file.packageFqName, file).build()
 
-    // TODO: filter out expects
-    val classifiers = file.declarations.filterIsInstance<FirClass>().sortedBy { it.classId.asFqNameString() }
+    fun List<FirDeclaration>.makeClassesProtoWithNested(): List<Pair<ProtoBuf.Class, Int>> =
+        // TODO: filter out expects
+        filterIsInstance<FirClass>().sortedBy { it.classId.asFqNameString() }.flatMap {
+            val classSerializer = FirElementSerializer.create(session, scopeSession, it, serializerExtension, null, approximator)
+            val index = classSerializer.stringTable.getFqNameIndex(it)
+            listOf(classSerializer.classProto(it).build() to index) + it.declarations.makeClassesProtoWithNested()
+        }
 
-    val classesProto = classifiers.map {
-        val classSerializer = FirElementSerializer.create(session, scopeSession, it, serializerExtension, null, approximator)
-        val index = classSerializer.stringTable.getFqNameIndex(it)
-        classSerializer.classProto(it).build() to index
-    }
+    val classesProto = file.declarations.makeClassesProtoWithNested()
 
     val hasTopLevelDeclarations = file.declarations.any {
         it is FirProperty || it is FirSimpleFunction || it is FirTypeAlias
