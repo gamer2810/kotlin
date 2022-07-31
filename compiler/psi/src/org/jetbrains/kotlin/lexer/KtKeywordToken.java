@@ -24,25 +24,25 @@ public class KtKeywordToken extends KtSingleValueToken {
     /**
      * Generate keyword (identifier that has a keyword meaning in all possible contexts)
      */
-    public static KtKeywordToken keyword(String value) {
-        return keyword(value, value);
+    public static KtKeywordToken keyword(String value, int tokenType) {
+        return keyword(value, value, tokenType);
     }
 
-    public static KtKeywordToken keyword(String debugName, String value) {
-        return new KtKeywordToken(debugName, value, false);
+    public static KtKeywordToken keyword(String debugName, String value, int tokenType) {
+        return new KtKeywordToken(debugName, value, false, tokenType);
     }
 
     /**
      * Generate soft keyword (identifier that has a keyword meaning only in some contexts)
      */
-    public static KtKeywordToken softKeyword(String value) {
-        return new KtKeywordToken(value, value, true);
+    public static KtKeywordToken softKeyword(String value, int tokenType) {
+        return new KtKeywordToken(value, value, true, tokenType);
     }
 
     private final boolean myIsSoft;
 
-    protected KtKeywordToken(@NotNull @NonNls String debugName, @NotNull @NonNls String value, boolean isSoft) {
-        super(debugName, value);
+    protected KtKeywordToken(@NotNull @NonNls String debugName, @NotNull @NonNls String value, boolean isSoft, int tokenType) {
+        super(debugName, value, tokenType);
         myIsSoft = isSoft;
     }
 

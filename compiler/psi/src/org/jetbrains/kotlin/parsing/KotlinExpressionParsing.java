@@ -44,9 +44,6 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
     public static final TokenSet WHEN_CONDITION_RECOVERY_SET = TokenSet.create(RBRACE, IN_KEYWORD, NOT_IN, IS_KEYWORD, NOT_IS, ELSE_KEYWORD);
     private static final TokenSet WHEN_CONDITION_RECOVERY_SET_WITH_ARROW = TokenSet.create(RBRACE, IN_KEYWORD, NOT_IN, IS_KEYWORD, NOT_IS, ELSE_KEYWORD, ARROW, DOT);
     private static final ImmutableMap<String, KtToken> KEYWORD_TEXTS = tokenSetToMap(KEYWORDS);
-
-    private static final @NotNull TokenSet LOCAL_DECLARATION_FIRST =
-            TokenSet.create(CLASS_KEYWORD, INTERFACE_KEYWORD, FUN_KEYWORD, VAL_KEYWORD, VAR_KEYWORD, TYPE_ALIAS_KEYWORD);
     public static final TokenSet TOKEN_SET_TO_FOLLOW_AFTER_DESTRUCTURING_DECLARATION_IN_LAMBDA = TokenSet.create(ARROW, COMMA, COLON);
     private static final @NotNull TokenSet EQ_RPAR_SET = TokenSet.create(EQ, RPAR);
     private static final @NotNull TokenSet ARROW_COMMA_SET = TokenSet.create(ARROW, COMMA);
@@ -625,66 +622,104 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
     private boolean parseAtomicExpression() {
         boolean ok = true;
 
-        if (at(LPAR)) {
-            parseParenthesizedExpression();
+        switch (getTokenType()) {
+            case LPAR_Type:
+                parseParenthesizedExpression();
+                break;
+            case LBRACKET_Type:
+                parseCollectionLiteralExpression();
+                break;
+            case THIS_KEYWORD_Type:
+                parseThisExpression();
+                break;
+            case SUPER_KEYWORD_Type:
+                parseSuperExpression();
+                break;
+            case OBJECT_KEYWORD_Type:
+                parseObjectLiteral();
+                break;
+            case THROW_KEYWORD_Type:
+                parseThrow();
+                break;
+            case RETURN_KEYWORD_Type:
+                parseReturn();
+                break;
+            case CONTINUE_KEYWORD_Type:
+                parseJump(CONTINUE);
+                break;
+            case BREAK_KEYWORD_Type:
+                parseJump(BREAK);
+                break;
+            case IF_KEYWORD_Type:
+                parseIf();
+                break;
+            case WHEN_KEYWORD_Type:
+                parseWhen();
+                break;
+            case TRY_KEYWORD_Type:
+                parseTry();
+                break;
+            case FOR_KEYWORD_Type:
+                parseFor();
+                break;
+            case WHILE_KEYWORD_Type:
+                parseWhile();
+                break;
+            case DO_KEYWORD_Type:
+                parseDoWhile();
+                break;
+            case IDENTIFIER_Type:
+                parseSimpleNameExpression();
+                break;
+            case LBRACE_Type:
+                parseFunctionLiteral();
+                break;
+            case OPEN_QUOTE_Type:
+                parseStringTemplate();
+                break;
+            /*
+             * literalConstant
+             *   : "true" | "false"
+             *   : stringTemplate
+             *   : NoEscapeString
+             *   : IntegerLiteral
+             *   : CharacterLiteral
+             *   : FloatLiteral
+             *   : "null"
+             *   ;
+             */
+            case TRUE_KEYWORD_Type:
+            case FALSE_KEYWORD_Type:
+                parseOneTokenExpression(BOOLEAN_CONSTANT);
+                break;
+            case INTEGER_LITERAL_Type:
+                parseOneTokenExpression(INTEGER_CONSTANT);
+                break;
+            case CHARACTER_LITERAL_Type:
+                parseOneTokenExpression(CHARACTER_CONSTANT);
+                break;
+            case FLOAT_LITERAL_Type:
+                parseOneTokenExpression(FLOAT_CONSTANT);
+                break;
+            case NULL_KEYWORD_Type:
+                parseOneTokenExpression(NULL);
+                break;
+            case CLASS_KEYWORD_Type:
+            case INTERFACE_KEYWORD_Type:
+            case FUN_KEYWORD_Type:
+            case VAL_KEYWORD_Type:
+            case VAR_KEYWORD_Type:
+            case TYPE_ALIAS_KEYWORD_Type:
+                if (!parseLocalDeclaration(/* rollbackIfDefinitelyNotExpression = */ myBuilder.newlineBeforeCurrentToken(), false)) {
+                    ok = false;
+                }
+                // declaration was parsed, do nothing
+                break;
+            default:
+                ok = false;
         }
-        else if (at(LBRACKET)) {
-            parseCollectionLiteralExpression();
-        }
-        else if (at(THIS_KEYWORD)) {
-            parseThisExpression();
-        }
-        else if (at(SUPER_KEYWORD)) {
-            parseSuperExpression();
-        }
-        else if (at(OBJECT_KEYWORD)) {
-            parseObjectLiteral();
-        }
-        else if (at(THROW_KEYWORD)) {
-            parseThrow();
-        }
-        else if (at(RETURN_KEYWORD)) {
-            parseReturn();
-        }
-        else if (at(CONTINUE_KEYWORD)) {
-            parseJump(CONTINUE);
-        }
-        else if (at(BREAK_KEYWORD)) {
-            parseJump(BREAK);
-        }
-        else if (at(IF_KEYWORD)) {
-            parseIf();
-        }
-        else if (at(WHEN_KEYWORD)) {
-            parseWhen();
-        }
-        else if (at(TRY_KEYWORD)) {
-            parseTry();
-        }
-        else if (at(FOR_KEYWORD)) {
-            parseFor();
-        }
-        else if (at(WHILE_KEYWORD)) {
-            parseWhile();
-        }
-        else if (at(DO_KEYWORD)) {
-            parseDoWhile();
-        }
-        else if (atSet(LOCAL_DECLARATION_FIRST) &&
-                    parseLocalDeclaration(/* rollbackIfDefinitelyNotExpression = */ myBuilder.newlineBeforeCurrentToken(), false)) {
-            // declaration was parsed, do nothing
-        }
-        else if (at(IDENTIFIER)) {
-            parseSimpleNameExpression();
-        }
-        else if (at(LBRACE)) {
-            parseFunctionLiteral();
-        }
-        else if (at(OPEN_QUOTE)) {
-            parseStringTemplate();
-        }
-        else if (!parseLiteralConstant()) {
-            ok = false;
+
+        if (!ok) {
             // TODO: better recovery if FIRST(element) did not match
             errorWithRecovery("Expecting an element", TokenSet.orSet(EXPRESSION_FOLLOW, TokenSet.create(LONG_TEMPLATE_ENTRY_END)));
         }
@@ -797,39 +832,6 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
         else {
             errorAndAdvance("Unexpected token in a string template");
         }
-    }
-
-    /*
-     * literalConstant
-     *   : "true" | "false"
-     *   : stringTemplate
-     *   : NoEscapeString
-     *   : IntegerLiteral
-     *   : CharacterLiteral
-     *   : FloatLiteral
-     *   : "null"
-     *   ;
-     */
-    private boolean parseLiteralConstant() {
-        if (at(TRUE_KEYWORD) || at(FALSE_KEYWORD)) {
-            parseOneTokenExpression(BOOLEAN_CONSTANT);
-        }
-        else if (at(INTEGER_LITERAL)) {
-            parseOneTokenExpression(INTEGER_CONSTANT);
-        }
-        else if (at(CHARACTER_LITERAL)) {
-            parseOneTokenExpression(CHARACTER_CONSTANT);
-        }
-        else if (at(FLOAT_LITERAL)) {
-            parseOneTokenExpression(FLOAT_CONSTANT);
-        }
-        else if (at(NULL_KEYWORD)) {
-            parseOneTokenExpression(NULL);
-        }
-        else {
-            return false;
-        }
-        return true;
     }
 
     /*
@@ -958,39 +960,45 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
     private void parseWhenCondition() {
         PsiBuilder.Marker condition = mark();
         myBuilder.disableNewlines();
-        if (at(IN_KEYWORD) || at(NOT_IN)) {
-            PsiBuilder.Marker mark = mark();
-            advance(); // IN_KEYWORD or NOT_IN
-            mark.done(OPERATION_REFERENCE);
+        switch (getTokenType()) {
+            case IN_KEYWORD_Type:
+            case NOT_IN_Type:
+                PsiBuilder.Marker mark = mark();
+                advance(); // IN_KEYWORD or NOT_IN
+                mark.done(OPERATION_REFERENCE);
 
 
-            if (atSet(WHEN_CONDITION_RECOVERY_SET_WITH_ARROW)) {
-                error("Expecting an element");
-            }
-            else {
-                parseExpression();
-            }
-            condition.done(WHEN_CONDITION_IN_RANGE);
-        }
-        else if (at(IS_KEYWORD) || at(NOT_IS)) {
-            advance(); // IS_KEYWORD or NOT_IS
+                if (atSet(WHEN_CONDITION_RECOVERY_SET_WITH_ARROW)) {
+                    error("Expecting an element");
+                }
+                else {
+                    parseExpression();
+                }
+                condition.done(WHEN_CONDITION_IN_RANGE);
+                break;
+            case IS_KEYWORD_Type:
+            case NOT_IS_Type:
+                advance(); // IS_KEYWORD or NOT_IS
 
-            if (atSet(WHEN_CONDITION_RECOVERY_SET_WITH_ARROW)) {
-                error("Expecting a type");
-            }
-            else {
-                myKotlinParsing.parseTypeRef();
-            }
-            condition.done(WHEN_CONDITION_IS_PATTERN);
-        }
-        else {
-            if (atSet(WHEN_CONDITION_RECOVERY_SET_WITH_ARROW)) {
+                if (atSet(WHEN_CONDITION_RECOVERY_SET_WITH_ARROW)) {
+                    error("Expecting a type");
+                }
+                else {
+                    myKotlinParsing.parseTypeRef();
+                }
+                condition.done(WHEN_CONDITION_IS_PATTERN);
+                break;
+            case RBRACE_Type:
+            case ELSE_KEYWORD_Type:
+            case ARROW_Type:
+            case DOT_Type:
                 error("Expecting an expression, is-condition or in-condition");
-            }
-            else {
+                condition.done(WHEN_CONDITION_EXPRESSION);
+                break;
+            default:
                 parseExpression();
-            }
-            condition.done(WHEN_CONDITION_EXPRESSION);
+                condition.done(WHEN_CONDITION_EXPRESSION);
+                break;
         }
         myBuilder.restoreNewlinesState();
     }

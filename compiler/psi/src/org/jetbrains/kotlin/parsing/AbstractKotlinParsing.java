@@ -247,6 +247,11 @@ import static org.jetbrains.kotlin.parsing.KotlinParsing.*;
         myBuilder.advanceLexer();
     }
 
+    protected int getTokenType() {
+        IElementType elementType = tt();
+        return (elementType instanceof KtToken) ? ((KtToken)elementType).tokenType : INVALID_Type;
+    }
+
     protected IElementType tt() {
         return myBuilder.getTokenType();
     }
@@ -405,39 +410,42 @@ import static org.jetbrains.kotlin.parsing.KotlinParsing.*;
                     pattern.isTopLevel(openAngleBrackets, openBrackets, openBraces, openParentheses))) {
                 break;
             }
-            if (at(LPAR)) {
-                openParentheses++;
-                opens.push(LPAR);
-            }
-            else if (at(LT)) {
-                openAngleBrackets++;
-                opens.push(LT);
-            }
-            else if (at(LBRACE)) {
-                openBraces++;
-                opens.push(LBRACE);
-            }
-            else if (at(LBRACKET)) {
-                openBrackets++;
-                opens.push(LBRACKET);
-            }
-            else if (at(RPAR)) {
-                openParentheses--;
-                if (opens.isEmpty() || opens.pop() != LPAR) {
-                    if (pattern.handleUnmatchedClosing(RPAR)) {
-                        break;
+            switch (getTokenType()) {
+                case LPAR_Type:
+                    openParentheses++;
+                    opens.push(LPAR);
+                    break;
+                case LT_Type:
+                    openAngleBrackets++;
+                    opens.push(LT);
+                    break;
+                case LBRACE_Type:
+                    openBraces++;
+                    opens.push(LBRACE);
+                    break;
+                case LBRACKET_Type:
+                    openBrackets++;
+                    opens.push(LBRACKET);
+                    break;
+                case RPAR_Type:
+                    openParentheses--;
+                    if (opens.isEmpty() || opens.pop() != LPAR) {
+                        if (pattern.handleUnmatchedClosing(RPAR)) {
+                            break;
+                        }
                     }
-                }
+                    break;
+                case GT_Type:
+                    openAngleBrackets--;
+                    break;
+                case RBRACE_Type:
+                    openBraces--;
+                    break;
+                case RBRACKET_Type:
+                    openBrackets--;
+                    break;
             }
-            else if (at(GT)) {
-                openAngleBrackets--;
-            }
-            else if (at(RBRACE)) {
-                openBraces--;
-            }
-            else if (at(RBRACKET)) {
-                openBrackets--;
-            }
+
             advance(); // skip token
         }
 
