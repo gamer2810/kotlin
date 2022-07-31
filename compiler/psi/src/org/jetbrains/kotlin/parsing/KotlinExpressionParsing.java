@@ -121,7 +121,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
             LBRACKET // Collection literal expression
     );
 
-    public static final TokenSet STATEMENT_FIRST = TokenSet.orSet(
+    private static final TokenSet STATEMENT_FIRST = TokenSet.orSet(
             EXPRESSION_FIRST,
             TokenSet.create(
                     // declaration
@@ -194,7 +194,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
         ;
 
         static {
-            Precedence[] values = Precedence.values();
+            Precedence[] values = values();
             for (Precedence precedence : values) {
                 int ordinal = precedence.ordinal();
                 precedence.higher = ordinal > 0 ? values[ordinal - 1] : null;
@@ -230,7 +230,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
         }
     }
 
-    public static final TokenSet ALLOW_NEWLINE_OPERATIONS = TokenSet.create(
+    private static final TokenSet ALLOW_NEWLINE_OPERATIONS = TokenSet.create(
             DOT, SAFE_ACCESS,
             COLON, AS_KEYWORD, AS_SAFE,
             ELVIS,
@@ -247,7 +247,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
         for (Precedence precedence : values) {
             operations.addAll(Arrays.asList(precedence.getOperations().getTypes()));
         }
-        ALL_OPERATIONS = TokenSet.create(operations.toArray(new IElementType[operations.size()]));
+        ALL_OPERATIONS = TokenSet.create(operations.toArray(new IElementType[0]));
     }
 
     static {
@@ -854,7 +854,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
             advanceAt(LPAR);
 
             PsiBuilder.Marker atWhenStart = mark();
-            myKotlinParsing.parseAnnotationsList(DEFAULT, EQ_RPAR_SET);
+            myKotlinParsing.parseAnnotationsList(EQ_RPAR_SET);
             if (at(VAL_KEYWORD) || at(VAR_KEYWORD)) {
                 IElementType declType = myKotlinParsing.parseProperty(KotlinParsing.DeclarationParsingMode.LOCAL);
 
@@ -1107,7 +1107,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
     private boolean parseLocalDeclaration(boolean rollbackIfDefinitelyNotExpression, boolean isScriptTopLevel) {
         PsiBuilder.Marker decl = mark();
         KotlinParsing.ModifierDetector detector = new KotlinParsing.ModifierDetector();
-        myKotlinParsing.parseModifierList(detector, DEFAULT, TokenSet.EMPTY);
+        myKotlinParsing.parseModifierList(detector, TokenSet.EMPTY);
 
         IElementType declType = parseLocalDeclarationRest(detector, rollbackIfDefinitelyNotExpression, isScriptTopLevel);
 
@@ -1150,13 +1150,14 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
 
         boolean paramsFound = false;
 
-        if (at(ARROW)) {
+        IElementType token = tt();
+        if (token == ARROW) {
             //   { -> ...}
             mark().done(VALUE_PARAMETER_LIST);
             advance(); // ARROW
             paramsFound = true;
         }
-        else if (at(IDENTIFIER) || at(COLON) || at(LPAR)) {
+        else if (token == IDENTIFIER || token == COLON || token == LPAR) {
             // Try to parse a simple name list followed by an ARROW
             //   {a -> ...}
             //   {a, b -> ...}
@@ -1471,7 +1472,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
                 PsiBuilder.Marker parameter = mark();
 
                 if (!at(IN_KEYWORD)) {
-                    myKotlinParsing.parseModifierList(DEFAULT, IN_KEYWORD_R_PAR_COLON_SET);
+                    myKotlinParsing.parseModifierList(IN_KEYWORD_R_PAR_COLON_SET);
                 }
 
                 if (at(VAL_KEYWORD) || at(VAR_KEYWORD)) advance(); // VAL_KEYWORD or VAR_KEYWORD
